@@ -1,0 +1,13 @@
+**
+!package.json
+!package.nls.json
+!package.nls.*.json
+!l10n/*.json
+!README.md
+!CHANGELOG.md
+!LICENSE
+!THIRD_PARTY_NOTICES.md
+!dist/**
+!media/icon.png
+!media/print-*.svg
+dist/**/*.map

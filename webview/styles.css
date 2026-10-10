@@ -1,0 +1,928 @@
+/* PDF Tools webview. Colors come from the VS Code theme (--vscode-* variables).
+   Layout:
+   row 1 toolbar · row 2 mode tools · banner · [strip | sidebar | canvas]. */
+
+:root {
+  --row-height: 32px;
+  --sidebar-width: 264px;
+  --border: var(--vscode-editorWidget-border, var(--vscode-panel-border, rgba(128, 128, 128, 0.35)));
+  --side-bg: var(--vscode-sideBar-background, var(--vscode-editor-background));
+  --hover-bg: var(--vscode-toolbar-hoverBackground, rgba(90, 93, 94, 0.31));
+  --pressed-bg: var(--vscode-inputOption-activeBackground, rgba(0, 120, 212, 0.25));
+  --pressed-border: var(--vscode-inputOption-activeBorder, var(--vscode-focusBorder));
+  --pressed-fg: var(--vscode-inputOption-activeForeground, var(--vscode-foreground));
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background: var(--vscode-editor-background);
+  color: var(--vscode-foreground);
+  font-family: var(--vscode-font-family);
+  font-size: var(--vscode-font-size);
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+/* --- Icons and buttons --------------------------------------------------- */
+
+.icon-svg {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.1;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  flex: none;
+}
+
+button.icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-width: 26px;
+  height: 24px;
+  padding: 0 4px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--vscode-icon-foreground, var(--vscode-foreground));
+  font: inherit;
+  cursor: pointer;
+  flex: none;
+}
+
+button.icon.labelled {
+  padding: 0 8px 0 6px;
+  color: var(--vscode-foreground);
+}
+
+button.icon:hover:not(:disabled) {
+  background: var(--hover-bg);
+}
+
+button.icon[aria-pressed="true"] {
+  background: var(--pressed-bg);
+  border-color: var(--pressed-border);
+  color: var(--pressed-fg);
+}
+
+button.icon:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+[tabindex]:focus-visible {
+  outline: 1px solid var(--vscode-focusBorder);
+  outline-offset: -1px;
+}
+
+input[type="text"],
+input[type="search"],
+select {
+  height: 22px;
+  box-sizing: border-box;
+  border: 1px solid var(--vscode-input-border, var(--vscode-dropdown-border, transparent));
+  border-radius: 2px;
+  background: var(--vscode-input-background);
+  color: var(--vscode-input-foreground);
+  font-family: inherit;
+  font-size: inherit;
+}
+
+select {
+  background: var(--vscode-dropdown-background);
+  color: var(--vscode-dropdown-foreground);
+}
+
+input::placeholder {
+  color: var(--vscode-input-placeholderForeground);
+}
+
+.separator {
+  width: 1px;
+  height: 16px;
+  margin: 0 4px;
+  background: var(--border);
+  flex: none;
+}
+
+.spacer {
+  flex: 1;
+}
+
+.badge {
+  display: inline-block;
+  min-width: 16px;
+  padding: 0 5px;
+  border-radius: 8px;
+  background: var(--vscode-badge-background);
+  color: var(--vscode-badge-foreground);
+  font-size: 11px;
+  line-height: 16px;
+  text-align: center;
+}
+
+.empty {
+  padding: 8px 4px;
+  color: var(--vscode-descriptionForeground);
+}
+
+/* --- Toolbars -------------------------------------------------------------- */
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  min-height: var(--row-height);
+  padding: 0 6px;
+  box-sizing: border-box;
+  border-bottom: 1px solid var(--border);
+  flex: none;
+  container-type: inline-size;
+}
+
+#toolbar {
+  background: var(--vscode-editor-background);
+}
+
+.tools-row {
+  background: var(--side-bg);
+}
+
+.tools-row .tools {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 2px;
+  padding: 3px 0;
+}
+
+.tools-row .hint {
+  margin-left: 10px;
+  color: var(--vscode-descriptionForeground);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.group {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.segmented {
+  display: inline-flex;
+  gap: 1px;
+  padding: 1px;
+  margin-right: 4px;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+}
+
+.segmented button.icon {
+  height: 22px;
+  border: 0;
+  color: var(--vscode-descriptionForeground);
+}
+
+.segmented button.icon[aria-pressed="true"] {
+  background: var(--vscode-button-background);
+  color: var(--vscode-button-foreground);
+}
+
+.page-input {
+  width: 4.5em;
+  padding: 0 4px;
+  text-align: right;
+}
+
+.label,
+.page-count {
+  padding: 0 4px;
+  color: var(--vscode-descriptionForeground);
+  white-space: nowrap;
+}
+
+.scale-select {
+  width: 116px;
+}
+
+/* Narrow editors: drop secondary controls (all stay in "…" and the palette). */
+@container (max-width: 560px) {
+  .scale-select,
+  .page-count {
+    display: none;
+  }
+}
+
+@container (max-width: 420px) {
+  .segmented span,
+  .zoom {
+    display: none;
+  }
+}
+
+/* Focus mode: row 1 floats over the page, row 2 is hidden. The
+   container query context goes: a floating bar sizes to its content. */
+body.focus-mode #toolbar2 {
+  display: none;
+}
+
+body.focus-mode #toolbar {
+  position: absolute;
+  z-index: 25;
+  left: 50%;
+  bottom: 16px;
+  transform: translateX(-50%);
+  max-width: calc(100% - 24px);
+  padding: 3px 6px;
+  flex-wrap: wrap;
+  justify-content: center;
+  container-type: normal;
+  background: var(--vscode-editorWidget-background, var(--vscode-editor-background));
+  border: 1px solid var(--vscode-editorWidget-border, var(--border));
+  border-radius: 8px;
+  box-shadow: 0 6px 22px var(--vscode-widget-shadow, rgba(0, 0, 0, 0.35));
+  transition: opacity 0.25s ease;
+}
+
+body.focus-mode #toolbar .spacer {
+  flex: 0 0 6px;
+}
+
+body.focus-mode #toolbar.idle {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Presentation mode: one fitted page on black, no UI. */
+body.presenting :is(#toolbar, #toolbar2, #banner:not([data-level="error"]), #strip, #sidebar) {
+  display: none !important;
+}
+
+body.presenting #viewerContainer {
+  overflow: hidden;
+  background: #000000;
+}
+
+body.presenting .pdfViewer .page {
+  box-shadow: none;
+}
+
+.presentation-hint {
+  position: absolute;
+  z-index: 25;
+  left: 50%;
+  bottom: 24px;
+  transform: translateX(-50%);
+  padding: 6px 14px;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.75);
+  color: #ffffff;
+  white-space: nowrap;
+  pointer-events: none;
+  transition: opacity 0.8s ease;
+}
+
+.presentation-hint.fading {
+  opacity: 0;
+}
+
+/* --- Banner ---------------------------------------------------------------- */
+
+#banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px 6px 12px;
+  background: var(--vscode-editorWidget-background, var(--vscode-editor-background));
+  border-bottom: 1px solid var(--border);
+  flex: none;
+}
+
+#banner[data-level="info"] > .codicon {
+  color: var(--vscode-editorInfo-foreground, var(--vscode-foreground));
+}
+
+#banner[data-level="warning"] > .codicon {
+  color: var(--vscode-editorWarning-foreground, var(--vscode-foreground));
+}
+
+#banner[data-level="error"] > .codicon {
+  color: var(--vscode-editorError-foreground, var(--vscode-foreground));
+}
+
+#bannerText {
+  flex: 1;
+}
+
+/* --- Main area: strip, sidebar, canvas ------------------------------------ */
+
+#main {
+  flex: 1;
+  display: flex;
+  min-height: 0;
+}
+
+#strip {
+  width: 38px;
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 0;
+  box-sizing: border-box;
+  background: var(--side-bg);
+  border-right: 1px solid var(--border);
+}
+
+#strip button.strip-button {
+  position: relative;
+  width: 30px;
+  height: 30px;
+  border: 0;
+  border-radius: 5px;
+  color: var(--vscode-activityBar-inactiveForeground, var(--vscode-descriptionForeground));
+}
+
+#strip button.strip-button[aria-pressed] {
+  background: transparent;
+}
+
+#strip button.strip-button.active {
+  color: var(--vscode-activityBar-foreground, var(--vscode-foreground));
+}
+
+#strip button.strip-button.active::before {
+  content: "";
+  position: absolute;
+  left: -4px;
+  top: 6px;
+  bottom: 6px;
+  width: 2px;
+  border-radius: 2px;
+  background: var(--vscode-activityBar-activeBorder, var(--vscode-focusBorder));
+}
+
+#sidebar {
+  width: var(--sidebar-width);
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  background: var(--side-bg);
+  border-right: 1px solid var(--border);
+}
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  height: 30px;
+  padding: 0 6px 0 12px;
+  flex: none;
+}
+
+.panel-title {
+  flex: 1;
+  margin: 0;
+  overflow: hidden;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--vscode-sideBarTitle-foreground, var(--vscode-foreground));
+}
+
+.panel-actions {
+  display: flex;
+  gap: 1px;
+}
+
+.panel-body {
+  flex: 1;
+  overflow: auto;
+  padding: 0 8px 12px;
+}
+
+.panel-filter {
+  width: 100%;
+  margin: 2px 0 8px;
+  padding: 0 6px;
+}
+
+#canvasArea {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+}
+
+/* PDFViewer requires an absolutely positioned, scrollable container.
+   `isolation` keeps pdf.js's inline z-indexes (form fields get 0, 2, 4, … and
+   popups +1000) inside the viewer, below the menu and find widget. */
+#viewerContainer {
+  position: absolute;
+  inset: 0;
+  isolation: isolate;
+  overflow: auto;
+  outline: none;
+  background: var(--vscode-editor-background);
+}
+
+/* PDF pages stay white in every theme: they are paper. */
+.pdfViewer .page {
+  --page-border: none;
+  box-shadow: 0 1px 4px var(--vscode-widget-shadow, rgba(0, 0, 0, 0.3));
+  margin: 12px auto;
+}
+
+/* "Match Theme Colors": the page, its form fields and the thumbnails go
+   through the SVG filter built by webview/ui/pageColors.ts. */
+.svg-defs {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+}
+
+body.page-colors .pdfViewer .page {
+  --page-bg-color: var(--vscode-editor-background);
+  box-shadow: 0 0 0 1px var(--border);
+}
+
+body.page-colors .pdfViewer .page :is(.canvasWrapper, .annotationLayer),
+body.page-colors .thumbnail-frame canvas {
+  filter: url(#pdfToolsPageColors);
+}
+
+body.page-colors .thumbnail-frame {
+  background: var(--vscode-editor-background);
+}
+
+/* "Highlight fields" off: no tint on unfocused form fields. */
+#viewerContainer.no-field-highlight .annotationLayer {
+  --annotation-unfocused-field-background: none;
+}
+
+/* Hand tool. */
+#viewerContainer.hand-tool,
+#viewerContainer.hand-tool .textLayer :is(span, br) {
+  cursor: grab;
+  user-select: none;
+}
+
+#viewerContainer.hand-tool.grabbing,
+#viewerContainer.hand-tool.grabbing .textLayer :is(span, br) {
+  cursor: grabbing;
+}
+
+/* --- Menu ---------------------------------------------------------------- */
+
+.menu {
+  position: absolute;
+  z-index: 30;
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
+  max-width: calc(100% - 8px);
+  max-height: calc(100% - 16px);
+  overflow: auto;
+  padding: 4px;
+  box-sizing: border-box;
+  background: var(--vscode-menu-background, var(--vscode-editorWidget-background));
+  color: var(--vscode-menu-foreground, var(--vscode-foreground));
+  border: 1px solid var(--vscode-menu-border, var(--border));
+  border-radius: 6px;
+  box-shadow: 0 4px 16px var(--vscode-widget-shadow, rgba(0, 0, 0, 0.35));
+}
+
+.menu-column {
+  width: 268px;
+  flex: none;
+}
+
+.menu-column + .menu-column {
+  padding-left: 4px;
+  border-left: 1px solid var(--vscode-menu-separatorBackground, var(--border));
+}
+
+/* Narrow editors: one column. */
+@media (max-width: 600px) {
+  .menu {
+    flex-direction: column;
+  }
+
+  .menu-column + .menu-column {
+    padding-left: 0;
+    border-left: 0;
+  }
+}
+
+.menu-section {
+  padding: 6px 8px 3px;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--vscode-descriptionForeground);
+}
+
+.menu-label {
+  padding: 4px 8px 2px 32px;
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  /* min-height: long translations (German) wrap to a second line. */
+  min-height: 26px;
+  padding: 3px 8px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  line-height: 1.35;
+  text-align: left;
+  cursor: pointer;
+}
+
+.menu-item:hover:not(:disabled),
+.menu-item:focus-visible {
+  background: var(--vscode-menu-selectionBackground, var(--vscode-list-activeSelectionBackground));
+  color: var(--vscode-menu-selectionForeground, var(--vscode-list-activeSelectionForeground));
+  outline: none;
+}
+
+.menu-item:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.menu-icon {
+  display: inline-flex;
+  width: 16px;
+  justify-content: center;
+}
+
+.menu-text {
+  flex: 1;
+}
+
+.menu-shortcut {
+  margin-left: 16px;
+  color: var(--vscode-descriptionForeground);
+  font-size: 12px;
+}
+
+.menu-item:hover .menu-shortcut,
+.menu-item:focus-visible .menu-shortcut {
+  color: inherit;
+  opacity: 0.85;
+}
+
+.menu-chips {
+  display: flex;
+  gap: 4px;
+  padding: 2px 8px 6px 32px;
+}
+
+.menu-chips button.icon {
+  border-color: var(--border);
+}
+
+.menu-chips button.icon[aria-checked="true"] {
+  background: var(--pressed-bg);
+  border-color: var(--pressed-border);
+  color: var(--pressed-fg);
+}
+
+.menu-rule {
+  height: 1px;
+  margin: 4px 6px;
+  background: var(--vscode-menu-separatorBackground, var(--border));
+}
+
+/* --- Find widget ------------------------------------------------------------ */
+
+.find-widget {
+  position: absolute;
+  z-index: 15;
+  top: 6px;
+  right: 18px;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 4px;
+  background: var(--vscode-editorWidget-background);
+  border: 1px solid var(--vscode-editorWidget-border, var(--border));
+  border-radius: 6px;
+  box-shadow: 0 2px 8px var(--vscode-widget-shadow, rgba(0, 0, 0, 0.35));
+}
+
+.find-input {
+  width: 220px;
+  padding: 0 6px;
+}
+
+.find-widget button.icon {
+  min-width: 22px;
+  height: 22px;
+  padding: 0 2px;
+}
+
+.find-count {
+  min-width: 72px;
+  padding: 0 6px;
+  color: var(--vscode-descriptionForeground);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.find-count.no-results {
+  color: var(--vscode-errorForeground);
+}
+
+/* --- Panels -------------------------------------------------------------------- */
+
+.thumbnails {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding-top: 4px;
+}
+
+.thumbnail {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 4px;
+  cursor: pointer;
+  color: var(--vscode-descriptionForeground);
+  font-size: 11px;
+}
+
+.thumbnail-frame {
+  display: flex;
+  background: #ffffff;
+  box-shadow: 0 1px 3px var(--vscode-widget-shadow, rgba(0, 0, 0, 0.3));
+}
+
+.thumbnail.current {
+  color: var(--vscode-foreground);
+}
+
+.thumbnail.current .thumbnail-frame {
+  outline: 2px solid var(--vscode-focusBorder);
+  outline-offset: 2px;
+}
+
+.tree,
+.tree ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tree li.collapsed > ul {
+  display: none;
+}
+
+.tree li.collapsed > .tree-row .twisty .codicon {
+  transform: rotate(-90deg);
+}
+
+.tree-row {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  min-height: 22px;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+.tree-row:hover,
+.field-row:hover,
+.search-result:hover {
+  background: var(--vscode-list-hoverBackground);
+}
+
+.tree-row.selected,
+.search-result.selected {
+  background: var(--vscode-list-activeSelectionBackground);
+  color: var(--vscode-list-activeSelectionForeground);
+}
+
+.twisty {
+  display: inline-flex;
+  width: 16px;
+  flex: none;
+  justify-content: center;
+}
+
+.tree-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tree-label.bold {
+  font-weight: 600;
+}
+
+.tree-label.italic {
+  font-style: italic;
+}
+
+.search-box {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.search-box .panel-filter {
+  flex: 1;
+  margin: 2px 2px 2px 0;
+}
+
+.search-summary {
+  margin: 6px 0;
+  color: var(--vscode-descriptionForeground);
+  font-size: 12px;
+}
+
+.search-page {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 8px;
+  padding: 2px 4px;
+  font-weight: 600;
+}
+
+.search-result {
+  padding: 3px 6px 3px 14px;
+  border-radius: 3px;
+  cursor: pointer;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.search-result mark,
+.field-row mark {
+  background: var(--vscode-editor-findMatchHighlightBackground, rgba(234, 92, 0, 0.33));
+  color: inherit;
+  border-radius: 2px;
+}
+
+.search-more {
+  margin: 8px 4px;
+  color: var(--vscode-descriptionForeground);
+}
+
+.field-group {
+  margin: 8px 0 2px;
+  padding: 0 4px;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--vscode-descriptionForeground);
+}
+
+.field-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 22px;
+  padding: 0 4px;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+.field-row.read-only {
+  opacity: 0.6;
+}
+
+.field-marker {
+  display: inline-flex;
+  width: 14px;
+  flex: none;
+  justify-content: center;
+}
+
+.field-marker.changed::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--vscode-focusBorder);
+}
+
+.field-marker.required {
+  color: var(--vscode-editorWarning-foreground);
+}
+
+.field-name {
+  flex: 1 1 50%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.field-value {
+  flex: 1 1 50%;
+  overflow: hidden;
+  color: var(--vscode-descriptionForeground);
+  text-align: right;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.attachment-row,
+.layer-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 26px;
+  padding: 0 4px;
+}
+
+.attachment-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.properties {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 4px 10px;
+  margin: 4px 0;
+}
+
+.properties dt {
+  color: var(--vscode-descriptionForeground);
+}
+
+.properties dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.properties-heading {
+  margin: 14px 0 6px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--vscode-descriptionForeground);
+}
+
+.text-button {
+  padding: 3px 10px;
+  border: 1px solid var(--vscode-button-border, transparent);
+  border-radius: 2px;
+  background: var(--vscode-button-secondaryBackground, var(--vscode-button-background));
+  color: var(--vscode-button-secondaryForeground, var(--vscode-button-foreground));
+  font: inherit;
+  cursor: pointer;
+}
+
+.text-button:hover {
+  background: var(--vscode-button-secondaryHoverBackground, var(--vscode-button-hoverBackground));
+}
+
+.font-row {
+  display: flex;
+  flex-direction: column;
+  padding: 3px 4px;
+}
+
+.font-name {
+  overflow-wrap: anywhere;
+}
+
+.font-details {
+  color: var(--vscode-descriptionForeground);
+  font-size: 12px;
+}

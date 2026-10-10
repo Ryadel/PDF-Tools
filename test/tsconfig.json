@@ -1,0 +1,19 @@
+{
+  // Tests are compiled to out/test (unit: ESM .mjs run by `node --test`;
+  // integration: CommonJS run by @vscode/test-cli inside VS Code). Unit tests
+  // also import the pure modules they test (src/shared, webview/forms), which
+  // are compiled to out/src and out/webview: hence the repository as rootDir.
+  "compilerOptions": {
+    "target": "es2024",
+    "lib": ["es2024", "dom"],
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "types": ["node", "mocha", "vscode"],
+    "rootDir": "..",
+    "outDir": "../out",
+    "strict": true,
+    "skipLibCheck": true,
+    "sourceMap": true
+  },
+  "include": ["./**/*.ts", "./**/*.mts", "../src/shared/**/*.ts", "../webview/forms/**/*.ts"]
+}

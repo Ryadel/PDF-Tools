@@ -1,0 +1,822 @@
+{
+  "name": "pdf-tools",
+  "displayName": "%displayName%",
+  "description": "%description%",
+  "version": "1.0.0",
+  "publisher": "Ryadel",
+  "author": {
+    "name": "Ryadel",
+    "url": "https://www.ryadel.com"
+  },
+  "license": "MIT",
+  "icon": "media/icon.png",
+  "galleryBanner": {
+    "color": "#2E3A44",
+    "theme": "dark"
+  },
+  "homepage": "https://github.com/Ryadel/PDF-Tools#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Ryadel/PDF-Tools.git"
+  },
+  "bugs": {
+    "url": "https://www.ryadel.com/en/contacts/"
+  },
+  "private": true,
+  "engines": {
+    "vscode": "^1.125.0"
+  },
+  "categories": [
+    "Visualization",
+    "Other"
+  ],
+  "keywords": [
+    "pdf",
+    "viewer",
+    "form",
+    "fill",
+    "print",
+    "export",
+    "xfdf"
+  ],
+  "main": "./dist/extension.js",
+  "extensionKind": [
+    "ui",
+    "workspace"
+  ],
+  "capabilities": {
+    "untrustedWorkspaces": {
+      "supported": true
+    },
+    "virtualWorkspaces": true
+  },
+  "contributes": {
+    "customEditors": [
+      {
+        "viewType": "pdfTools.editor",
+        "displayName": "%customEditor.displayName%",
+        "selector": [
+          {
+            "filenamePattern": "*.pdf"
+          }
+        ],
+        "priority": "default"
+      }
+    ],
+    "commands": [
+      {
+        "command": "pdfTools.firstPage",
+        "title": "%command.firstPage%",
+        "category": "%command.category%"
+      },
+      {
+        "command": "pdfTools.lastPage",
+        "title": "%command.lastPage%",
+        "category": "%command.category%"
+      },
+      {
+        "command": "pdfTools.nextPage",
+        "title": "%command.nextPage%",
+        "category": "%command.category%"
+      },
+      {
+        "command": "pdfTools.previousPage",
+        "title": "%command.previousPage%",
+        "category": "%command.category%"
+      },
+      {
+        "command": "pdfTools.back",
+        "title": "%command.back%",
+        "category": "%command.category%"
+      },
+      {
+        "command": "pdfTools.forward",
+        "title": "%command.forward%",
+        "category": "%command.category%"
+      },
+      {
+        "command": "pdfTools.goToPage",
+        "title": "%command.goToPage%",
+        "category": "%command.category%"
+      },
+      {
+        "command": "pdfTools.copyPageLink",
+        "title": "%command.copyPageLink%",
+        "category": "%command.category%"
+      },
+      {
+        "command": "pdfTools.copyPageImage",
+        "title": "%command.copyPageImage%",
+        "category": "%command.category%"
+      },
+      {
+        "command": "pdfTools.exportPageImage",
+        "title": "%command.exportPageImage%",
+        "category": "%command.category%"
+      },
+      {
+        "command": "pdfTools.zoomIn",
+        "title": "%command.zoomIn%",
+        "category": "%command.category%"
+      },
+      {
+        "command": "pdfTools.zoomOut",
+        "title": "%command.zoomOut%",
+        "category": "%command.category%"
+      },
+      {
+        "command": "pdfTools.zoomActual",
+        "title": "%command.zoomActual%",
+        "category": "%command.category%"
+      },
+      {
+        "command": "pdfTools.zoomAuto",
+        "title": "%command.zoomAuto%",
+        "category": "%command.category%"
+      },
+      {
+        "command": "pdfTools.fitWidth",
+        "title": "%command.fitWidth%",
+        "category": "%command.category%"
+      },
+      {
+        "command": "pdfTools.fitPage",
+        "title": "%command.fitPage%",
+        "category": "%command.category%"
+      },
+      {
+        "command": "pdfTools.pickZoom",
+        "title": "%command.pickZoom%",
+        "category": "%command.category%"
+      },
+      {
+        "command": "pdfTools.rotateClockwise",
+        "title": "%command.rotateClockwise%",
+        "category": "%command.category%"
+      },
+      {
+        "command": "pdfTools.rotateCounterclockwise",
+        "title": "%command.rotateCounterclockwise%",
+        "category": "%command.category%"
+      },
+      {
+        "command": "pdfTools.find",
+        "title": "%command.find%",
+        "category": "%command.category%"
+      },
+      {
+        "command": "pdfTools.findNext",
+        "title": "%command.findNext%",
+        "category": "%command.category%"
+      },
+      {
+        "command": "pdfTools.findPrevious",
+        "title": "%command.findPrevious%",
+        "category": "%command.category%"
+      },
+      {
+        "command": "pdfTools.showSearch",
+        "title": "%command.showSearch%",
+        "category": "%command.category%"
+      },
+      {
+        "command": "pdfTools.toggleSidebar",
+        "title": "%command.toggleSidebar%",
+        "category": "%command.category%"
+      },
+      {
+        "command": "pdfTools.showThumbnails",
+        "title": "%command.showThumbnails%",
+        "category": "%command.category%"
+      },
+      {
+        "command": "pdfTools.showOutline",
+        "title": "%command.showOutline%",
+        "category": "%command.category%"
+      },
+      {
+        "command": "pdfTools.showFields",
+        "title": "%command.showFields%",
+        "category": "%command.category%"
+      },
+      {
+        "command": "pdfTools.showAttachments",
+        "title": "%command.showAttachments%",
+        "category": "%command.category%"
+      },
+      {
+        "command": "pdfTools.showLayers",
+        "title": "%command.showLayers%",
+        "category": "%command.category%"
+      },
+      {
+        "command": "pdfTools.showProperties",
+        "title": "%command.showProperties%",
+        "category": "%command.category%"
+      },
+      {
+        "command": "pdfTools.openText",
+        "title": "%command.openText%",
+        "category": "%command.category%"
+      },
+      {
+        "command": "pdfTools.viewMode",
+        "title": "%command.viewMode%",
+        "category": "%command.category%"
+      },
+      {
+        "command": "pdfTools.fillMode",
+        "title": "%command.fillMode%",
+        "category": "%command.category%"
+      },
+      {
+        "command": "pdfTools.selectTool",
+        "title": "%command.selectTool%",
+        "category": "%command.category%"
+      },
+      {
+        "command": "pdfTools.handTool",
+        "title": "%command.handTool%",
+        "category": "%command.category%"
+      },
+      {
+        "command": "pdfTools.scrollVertical",
+        "title": "%command.scrollVertical%",
+        "category": "%command.category%"
+      },
+      {
+        "command": "pdfTools.scrollHorizontal",
+        "title": "%command.scrollHorizontal%",
+        "category": "%command.category%"
+      },
+      {
+        "command": "pdfTools.scrollWrapped",
+        "title": "%command.scrollWrapped%",
+        "category": "%command.category%"
+      },
+      {
+        "command": "pdfTools.scrollPage",
+        "title": "%command.scrollPage%",
+        "category": "%command.category%"
+      },
+      {
+        "command": "pdfTools.spreadNone",
+        "title": "%command.spreadNone%",
+        "category": "%command.category%"
+      },
+      {
+        "command": "pdfTools.spreadOdd",
+        "title": "%command.spreadOdd%",
+        "category": "%command.category%"
+      },
+      {
+        "command": "pdfTools.spreadEven",
+        "title": "%command.spreadEven%",
+        "category": "%command.category%"
+      },
+      {
+        "command": "pdfTools.togglePageColors",
+        "title": "%command.togglePageColors%",
+        "category": "%command.category%"
+      },
+      {
+        "command": "pdfTools.toggleFocusMode",
+        "title": "%command.toggleFocusMode%",
+        "category": "%command.category%"
+      },
+      {
+        "command": "pdfTools.presentationMode",
+        "title": "%command.presentationMode%",
+        "category": "%command.category%"
+      },
+      {
+        "command": "pdfTools.toggleFieldHighlight",
+        "title": "%command.toggleFieldHighlight%",
+        "category": "%command.category%"
+      },
+      {
+        "command": "pdfTools.nextField",
+        "title": "%command.nextField%",
+        "category": "%command.category%"
+      },
+      {
+        "command": "pdfTools.previousField",
+        "title": "%command.previousField%",
+        "category": "%command.category%"
+      },
+      {
+        "command": "pdfTools.nextRequiredField",
+        "title": "%command.nextRequiredField%",
+        "category": "%command.category%"
+      },
+      {
+        "command": "pdfTools.clearForm",
+        "title": "%command.clearForm%",
+        "category": "%command.category%"
+      },
+      {
+        "command": "pdfTools.exportFormData",
+        "title": "%command.exportFormData%",
+        "category": "%command.category%"
+      },
+      {
+        "command": "pdfTools.importFormData",
+        "title": "%command.importFormData%",
+        "category": "%command.category%"
+      },
+      {
+        "command": "pdfTools.print",
+        "title": "%command.print%",
+        "category": "%command.category%",
+        "icon": {
+          "light": "media/print-light.svg",
+          "dark": "media/print-dark.svg"
+        }
+      },
+      {
+        "command": "pdfTools.printPages",
+        "title": "%command.printPages%",
+        "category": "%command.category%"
+      },
+      {
+        "command": "pdfTools.openSettings",
+        "title": "%command.openSettings%",
+        "category": "%command.category%"
+      },
+      {
+        "command": "pdfTools.save",
+        "title": "%command.save%",
+        "category": "%command.category%"
+      },
+      {
+        "command": "pdfTools.saveAs",
+        "title": "%command.saveAs%",
+        "category": "%command.category%"
+      }
+    ],
+    "menus": {
+      "editor/title": [
+        {
+          "command": "pdfTools.print",
+          "when": "activeCustomEditorId == pdfTools.editor",
+          "group": "navigation"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "pdfTools.firstPage",
+          "when": "activeCustomEditorId == pdfTools.editor"
+        },
+        {
+          "command": "pdfTools.lastPage",
+          "when": "activeCustomEditorId == pdfTools.editor"
+        },
+        {
+          "command": "pdfTools.nextPage",
+          "when": "activeCustomEditorId == pdfTools.editor"
+        },
+        {
+          "command": "pdfTools.previousPage",
+          "when": "activeCustomEditorId == pdfTools.editor"
+        },
+        {
+          "command": "pdfTools.back",
+          "when": "activeCustomEditorId == pdfTools.editor"
+        },
+        {
+          "command": "pdfTools.forward",
+          "when": "activeCustomEditorId == pdfTools.editor"
+        },
+        {
+          "command": "pdfTools.goToPage",
+          "when": "activeCustomEditorId == pdfTools.editor"
+        },
+        {
+          "command": "pdfTools.copyPageLink",
+          "when": "activeCustomEditorId == pdfTools.editor"
+        },
+        {
+          "command": "pdfTools.copyPageImage",
+          "when": "activeCustomEditorId == pdfTools.editor"
+        },
+        {
+          "command": "pdfTools.exportPageImage",
+          "when": "activeCustomEditorId == pdfTools.editor"
+        },
+        {
+          "command": "pdfTools.zoomIn",
+          "when": "activeCustomEditorId == pdfTools.editor"
+        },
+        {
+          "command": "pdfTools.zoomOut",
+          "when": "activeCustomEditorId == pdfTools.editor"
+        },
+        {
+          "command": "pdfTools.zoomActual",
+          "when": "activeCustomEditorId == pdfTools.editor"
+        },
+        {
+          "command": "pdfTools.zoomAuto",
+          "when": "activeCustomEditorId == pdfTools.editor"
+        },
+        {
+          "command": "pdfTools.fitWidth",
+          "when": "activeCustomEditorId == pdfTools.editor"
+        },
+        {
+          "command": "pdfTools.fitPage",
+          "when": "activeCustomEditorId == pdfTools.editor"
+        },
+        {
+          "command": "pdfTools.pickZoom",
+          "when": "activeCustomEditorId == pdfTools.editor"
+        },
+        {
+          "command": "pdfTools.rotateClockwise",
+          "when": "activeCustomEditorId == pdfTools.editor"
+        },
+        {
+          "command": "pdfTools.rotateCounterclockwise",
+          "when": "activeCustomEditorId == pdfTools.editor"
+        },
+        {
+          "command": "pdfTools.find",
+          "when": "activeCustomEditorId == pdfTools.editor"
+        },
+        {
+          "command": "pdfTools.findNext",
+          "when": "activeCustomEditorId == pdfTools.editor"
+        },
+        {
+          "command": "pdfTools.findPrevious",
+          "when": "activeCustomEditorId == pdfTools.editor"
+        },
+        {
+          "command": "pdfTools.showSearch",
+          "when": "activeCustomEditorId == pdfTools.editor"
+        },
+        {
+          "command": "pdfTools.toggleSidebar",
+          "when": "activeCustomEditorId == pdfTools.editor"
+        },
+        {
+          "command": "pdfTools.showThumbnails",
+          "when": "activeCustomEditorId == pdfTools.editor"
+        },
+        {
+          "command": "pdfTools.showOutline",
+          "when": "activeCustomEditorId == pdfTools.editor"
+        },
+        {
+          "command": "pdfTools.showFields",
+          "when": "activeCustomEditorId == pdfTools.editor"
+        },
+        {
+          "command": "pdfTools.showAttachments",
+          "when": "activeCustomEditorId == pdfTools.editor"
+        },
+        {
+          "command": "pdfTools.showLayers",
+          "when": "activeCustomEditorId == pdfTools.editor"
+        },
+        {
+          "command": "pdfTools.showProperties",
+          "when": "activeCustomEditorId == pdfTools.editor"
+        },
+        {
+          "command": "pdfTools.openText",
+          "when": "activeCustomEditorId == pdfTools.editor"
+        },
+        {
+          "command": "pdfTools.viewMode",
+          "when": "activeCustomEditorId == pdfTools.editor"
+        },
+        {
+          "command": "pdfTools.fillMode",
+          "when": "activeCustomEditorId == pdfTools.editor"
+        },
+        {
+          "command": "pdfTools.selectTool",
+          "when": "activeCustomEditorId == pdfTools.editor"
+        },
+        {
+          "command": "pdfTools.handTool",
+          "when": "activeCustomEditorId == pdfTools.editor"
+        },
+        {
+          "command": "pdfTools.scrollVertical",
+          "when": "activeCustomEditorId == pdfTools.editor"
+        },
+        {
+          "command": "pdfTools.scrollHorizontal",
+          "when": "activeCustomEditorId == pdfTools.editor"
+        },
+        {
+          "command": "pdfTools.scrollWrapped",
+          "when": "activeCustomEditorId == pdfTools.editor"
+        },
+        {
+          "command": "pdfTools.scrollPage",
+          "when": "activeCustomEditorId == pdfTools.editor"
+        },
+        {
+          "command": "pdfTools.spreadNone",
+          "when": "activeCustomEditorId == pdfTools.editor"
+        },
+        {
+          "command": "pdfTools.spreadOdd",
+          "when": "activeCustomEditorId == pdfTools.editor"
+        },
+        {
+          "command": "pdfTools.spreadEven",
+          "when": "activeCustomEditorId == pdfTools.editor"
+        },
+        {
+          "command": "pdfTools.togglePageColors",
+          "when": "activeCustomEditorId == pdfTools.editor"
+        },
+        {
+          "command": "pdfTools.toggleFocusMode",
+          "when": "activeCustomEditorId == pdfTools.editor"
+        },
+        {
+          "command": "pdfTools.presentationMode",
+          "when": "activeCustomEditorId == pdfTools.editor"
+        },
+        {
+          "command": "pdfTools.toggleFieldHighlight",
+          "when": "activeCustomEditorId == pdfTools.editor"
+        },
+        {
+          "command": "pdfTools.nextField",
+          "when": "activeCustomEditorId == pdfTools.editor"
+        },
+        {
+          "command": "pdfTools.previousField",
+          "when": "activeCustomEditorId == pdfTools.editor"
+        },
+        {
+          "command": "pdfTools.nextRequiredField",
+          "when": "activeCustomEditorId == pdfTools.editor"
+        },
+        {
+          "command": "pdfTools.clearForm",
+          "when": "activeCustomEditorId == pdfTools.editor"
+        },
+        {
+          "command": "pdfTools.exportFormData",
+          "when": "activeCustomEditorId == pdfTools.editor"
+        },
+        {
+          "command": "pdfTools.importFormData",
+          "when": "activeCustomEditorId == pdfTools.editor"
+        },
+        {
+          "command": "pdfTools.print",
+          "when": "activeCustomEditorId == pdfTools.editor"
+        },
+        {
+          "command": "pdfTools.printPages",
+          "when": "activeCustomEditorId == pdfTools.editor"
+        },
+        {
+          "command": "pdfTools.openSettings",
+          "when": "activeCustomEditorId == pdfTools.editor"
+        },
+        {
+          "command": "pdfTools.save",
+          "when": "false"
+        },
+        {
+          "command": "pdfTools.saveAs",
+          "when": "false"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "%displayName%",
+      "properties": {
+        "pdfTools.print.method": {
+          "type": "string",
+          "enum": [
+            "systemViewer",
+            "windowsPrintVerb"
+          ],
+          "enumDescriptions": [
+            "%config.print.method.systemViewer%",
+            "%config.print.method.windowsPrintVerb%"
+          ],
+          "default": "systemViewer",
+          "markdownDescription": "%config.print.method%"
+        },
+        "pdfTools.default.mode": {
+          "type": "string",
+          "enum": [
+            "auto",
+            "view",
+            "fill"
+          ],
+          "default": "auto",
+          "enumDescriptions": [
+            "%config.default.mode.auto%",
+            "%config.default.mode.view%",
+            "%config.default.mode.fill%"
+          ],
+          "markdownDescription": "%config.default.mode%"
+        },
+        "pdfTools.default.scale": {
+          "type": "string",
+          "default": "auto",
+          "pattern": "^(\\d+(?:\\.\\d+)?|auto|page-actual|page-fit|page-width)$",
+          "markdownDescription": "%config.default.scale%"
+        },
+        "pdfTools.default.scrollMode": {
+          "type": "string",
+          "enum": [
+            "vertical",
+            "horizontal",
+            "wrapped",
+            "page"
+          ],
+          "default": "vertical",
+          "markdownDescription": "%config.default.scrollMode%"
+        },
+        "pdfTools.default.spreadMode": {
+          "type": "string",
+          "enum": [
+            "none",
+            "odd",
+            "even"
+          ],
+          "default": "none",
+          "markdownDescription": "%config.default.spreadMode%"
+        },
+        "pdfTools.default.cursor": {
+          "type": "string",
+          "enum": [
+            "select",
+            "hand"
+          ],
+          "default": "select",
+          "markdownDescription": "%config.default.cursor%"
+        },
+        "pdfTools.default.sidebar": {
+          "type": "boolean",
+          "default": false,
+          "markdownDescription": "%config.default.sidebar%"
+        },
+        "pdfTools.restoreViewState": {
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "%config.restoreViewState%"
+        },
+        "pdfTools.toolbar": {
+          "type": "string",
+          "enum": [
+            "fixed",
+            "floating"
+          ],
+          "enumDescriptions": [
+            "%config.toolbar.fixed%",
+            "%config.toolbar.floating%"
+          ],
+          "default": "fixed",
+          "markdownDescription": "%config.toolbar%"
+        },
+        "pdfTools.pageColors": {
+          "type": "string",
+          "enum": [
+            "off",
+            "theme"
+          ],
+          "enumDescriptions": [
+            "%config.pageColors.off%",
+            "%config.pageColors.theme%"
+          ],
+          "default": "off",
+          "markdownDescription": "%config.pageColors%"
+        }
+      }
+    },
+    "keybindings": [
+      {
+        "command": "pdfTools.find",
+        "key": "ctrl+f",
+        "mac": "cmd+f",
+        "when": "activeCustomEditorId == pdfTools.editor"
+      },
+      {
+        "command": "pdfTools.showSearch",
+        "key": "ctrl+shift+f",
+        "mac": "cmd+shift+f",
+        "when": "activeCustomEditorId == pdfTools.editor"
+      },
+      {
+        "command": "pdfTools.findNext",
+        "key": "f3",
+        "mac": "cmd+g",
+        "when": "activeCustomEditorId == pdfTools.editor"
+      },
+      {
+        "command": "pdfTools.findPrevious",
+        "key": "shift+f3",
+        "mac": "cmd+shift+g",
+        "when": "activeCustomEditorId == pdfTools.editor"
+      },
+      {
+        "command": "pdfTools.goToPage",
+        "key": "ctrl+g",
+        "mac": "ctrl+g",
+        "when": "activeCustomEditorId == pdfTools.editor"
+      },
+      {
+        "command": "pdfTools.zoomIn",
+        "key": "ctrl+=",
+        "mac": "cmd+=",
+        "when": "activeCustomEditorId == pdfTools.editor"
+      },
+      {
+        "command": "pdfTools.zoomIn",
+        "key": "ctrl+numpad_add",
+        "mac": "cmd+numpad_add",
+        "when": "activeCustomEditorId == pdfTools.editor"
+      },
+      {
+        "command": "pdfTools.zoomOut",
+        "key": "ctrl+-",
+        "mac": "cmd+-",
+        "when": "activeCustomEditorId == pdfTools.editor"
+      },
+      {
+        "command": "pdfTools.zoomOut",
+        "key": "ctrl+numpad_subtract",
+        "mac": "cmd+numpad_subtract",
+        "when": "activeCustomEditorId == pdfTools.editor"
+      },
+      {
+        "command": "pdfTools.zoomActual",
+        "key": "ctrl+0",
+        "mac": "cmd+0",
+        "when": "activeCustomEditorId == pdfTools.editor"
+      },
+      {
+        "command": "pdfTools.back",
+        "key": "alt+left",
+        "mac": "cmd+[",
+        "when": "activeCustomEditorId == pdfTools.editor && pdfTools.canGoBack"
+      },
+      {
+        "command": "pdfTools.forward",
+        "key": "alt+right",
+        "mac": "cmd+]",
+        "when": "activeCustomEditorId == pdfTools.editor && pdfTools.canGoForward"
+      },
+      {
+        "command": "pdfTools.presentationMode",
+        "key": "ctrl+alt+p",
+        "mac": "cmd+alt+p",
+        "when": "activeCustomEditorId == pdfTools.editor"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run package:build",
+    "build": "npm run check-types && npm run lint && node scripts/build.mjs",
+    "package:build": "npm run check-types && npm run lint && node scripts/build.mjs --production",
+    "watch:esbuild": "node scripts/build.mjs --watch",
+    "watch:tsc": "tsc --noEmit --watch --project tsconfig.json",
+    "check-types": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p webview/tsconfig.json",
+    "lint": "eslint src webview test && node scripts/l10n-extract.mjs --check",
+    "compile-tests": "tsc -p test/tsconfig.json",
+    "test:unit": "npm run compile-tests && node --test \"out/test/unit/**/*.test.mjs\"",
+    "pretest": "npm run compile-tests && node scripts/build.mjs",
+    "test": "vscode-test",
+    "package": "vsce package --no-dependencies",
+    "l10n": "node scripts/l10n-extract.mjs"
+  },
+  "devDependencies": {
+    "@cantoo/pdf-lib": "2.11.1",
+    "@eslint/js": "10.0.1",
+    "@types/mocha": "10.0.10",
+    "@types/node": "24.19.1",
+    "@types/vscode": "1.125.0",
+    "@vscode/codicons": "0.0.46-24",
+    "@vscode/test-cli": "0.0.15",
+    "@vscode/test-electron": "3.1.0",
+    "@vscode/vsce": "4.0.0",
+    "esbuild": "0.28.2",
+    "eslint": "10.12.0",
+    "pdf-lib": "1.17.1",
+    "pdfjs-dist": "6.4.299",
+    "typescript": "6.0.3",
+    "typescript-eslint": "8.71.1"
+  },
+  "overrides": {
+    "diff": "^9.0.0",
+    "serialize-javascript": "^7.1.2"
+  },
+  "activationEvents": [
+    "onUri"
+  ],
+  "l10n": "./l10n"
+}

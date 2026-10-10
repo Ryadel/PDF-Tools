@@ -1,0 +1,44 @@
+# --- Dependencies -------------------------------------------------------------
+node_modules/
+
+# --- Build and test output ----------------------------------------------------
+dist/
+out/
+*.vsix
+*.tsbuildinfo
+.eslintcache
+coverage/
+# VS Code builds downloaded by @vscode/test-cli for the integration tests
+.vscode-test/
+
+# --- VS Code ------------------------------------------------------------------
+# Shared project configuration is committed (F5 launch, watch tasks,
+# recommended extensions, workspace settings); anything else is personal.
+.vscode/*
+!.vscode/launch.json
+!.vscode/tasks.json
+!.vscode/extensions.json
+!.vscode/settings.json
+*.code-workspace
+.history/
+
+# --- AI agents ----------------------------------------------------------------
+# Agent scratch folder
+.tmp/
+# Personal Claude Code settings
+.claude/settings.local.json
+# Development material kept outside this repository (safety net)
+private/
+
+# --- Logs and environment -----------------------------------------------------
+npm-debug.log*
+*.log
+.env
+.env.*
+
+# --- OS files -----------------------------------------------------------------
+.DS_Store
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+

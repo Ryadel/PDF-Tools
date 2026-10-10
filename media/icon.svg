@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+  <!-- PDF Tools icon (flat slate tile, red "PDF"). Source of icon.png: node scripts/export-icon.mjs.
+       The letters are drawn paths, independent of installed fonts. -->
+  <defs>
+    <path id="page" d="M-24 -38 H10 L26 -22 V34 a5 5 0 0 1 -5 5 H-24 a5 5 0 0 1 -5 -5 V-33 a5 5 0 0 1 5 -5 Z"/>
+  </defs>
+  <rect x="4" y="4" width="120" height="120" rx="26" fill="#2E3A44"/>
+  <g transform="translate(64 65) scale(1.15) translate(-64 -65)">
+    <g transform="translate(58 68) rotate(-14)">
+      <use href="#page" fill="#FFFFFF" opacity="0.45"/>
+    </g>
+    <g transform="translate(62 66) rotate(-6)">
+      <use href="#page" fill="#FFFFFF" opacity="0.7"/>
+    </g>
+    <g transform="translate(68 64)">
+      <use href="#page" fill="#FFFFFF"/>
+      <path d="M10 -38 V-27 a5 5 0 0 0 5 5 H26 Z" fill="#E5392C"/>
+      <rect x="-21" y="-17" width="26" height="4.5" rx="2.25" fill="#D5DADF"/>
+      <rect x="-21" y="-7" width="36" height="4.5" rx="2.25" fill="#D5DADF"/>
+      <g fill="#D63327" fill-rule="evenodd">
+        <path d="M-19.6 26 V11.5 H-13.1 A4.5 4.5 0 0 1 -13.1 20.5 H-15.4 V26 Z M-15.4 15 H-13.3 A1.1 1.1 0 0 1 -13.3 17.2 H-15.4 Z"/>
+        <path d="M-7 11.5 H-1.5 A7.25 7.25 0 0 1 -1.5 26 H-7 Z M-2.8 15 H-1.7 A3.75 3.75 0 0 1 -1.7 22.5 H-2.8 Z"/>
+        <path d="M7.1 26 V11.5 H16.6 V15 H11.3 V17.3 H15.6 V20.6 H11.3 V26 Z"/>
+      </g>
+    </g>
+  </g>
+</svg>
