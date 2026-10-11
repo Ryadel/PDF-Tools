@@ -139,7 +139,8 @@ jobs:
 
   github-release:
     name: Create the GitHub release
-    needs: [build, marketplace, open-vsx]
+    # Not waiting for Open VSX: a failure there is fixed by re-running that job alone.
+    needs: [build, marketplace]
     runs-on: ubuntu-latest
     permissions:
       contents: write
