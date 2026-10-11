@@ -27,8 +27,11 @@ export interface PdfEngine {
   // --- Saving and form sync ---------------------------------------------
   /** The document bytes including every form change. */
   save(): Promise<Uint8Array>;
-  /** The host saved the document: the next change must report "modified" again. */
-  markSaved(): void;
+  /**
+   * The host saved the document: the next change must report "modified" again.
+   * `unsavedFieldIds` changed after the saved snapshot and stay marked as changed.
+   */
+  markSaved(unsavedFieldIds: readonly string[]): void;
   /** Applies field changes made in another editor of the same document. */
   applyFieldChanges(changes: FieldChange[]): void;
 

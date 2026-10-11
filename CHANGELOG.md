@@ -4,6 +4,13 @@ All notable changes to PDF Tools are documented in this file. The format follows
 
 ## [Unreleased]
 
+### Fixed
+
+- Form values changed while a save was in progress were left out of editors opened afterwards, and the document could end up marked as saved without them. Overlapping saves now run one after the other.
+- Running **Open Text in Editor** again replaced the text of an extraction you had edited; it now opens a new editor (`<name> (2).txt`), or shows the existing one if unchanged.
+- Temporary copies of opened attachments were never deleted; like print copies, they are now deleted after a day.
+- The README listed split and merge, which are not available yet.
+
 ## [1.0.0] - 2026-10-10
 
 First release on the Visual Studio Marketplace, with everything listed below for 1.0.0, 0.2.0 and 0.1.0. Versions 0.1.0 and 0.2.0 were internal builds and were not published; 1.0.0 was developed as 0.3.0.

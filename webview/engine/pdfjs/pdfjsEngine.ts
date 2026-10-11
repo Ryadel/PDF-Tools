@@ -353,9 +353,14 @@ export class PdfjsEngine implements PdfEngine {
     }
   }
 
-  markSaved(): void {
+  markSaved(unsavedFieldIds: readonly string[]): void {
     this.#document?.annotationStorage.resetModified();
-    this.#changedFieldIds.clear();
+    const unsaved = new Set(unsavedFieldIds);
+    for (const id of this.#changedFieldIds) {
+      if (!unsaved.has(id)) {
+        this.#changedFieldIds.delete(id);
+      }
+    }
   }
 
   get changedFieldIds(): ReadonlySet<string> {

@@ -155,6 +155,28 @@ suite("PDF Tools 0.3", () => {
     const editor = await waitFor(() => vscode.window.activeTextEditor, "text editor");
     assert.ok(editor.document.getText().includes(DOCUMENT_PAGES[2]));
     assert.equal(editor.document.uri.scheme, "untitled");
+
+    // Running it again must not overwrite an edited extraction: it opens "<name> (2).txt".
+    assert.ok(await editor.edit((edit) => edit.insert(new vscode.Position(0, 0), "My notes\n")));
+    await vscode.commands.executeCommand("vscode.openWith", uri, VIEW_TYPE);
+    await waitFor(() => vscode.window.tabGroups.activeTabGroup.activeTab?.input instanceof vscode.TabInputCustom, "PDF editor active");
+    await vscode.commands.executeCommand("pdfTools.openText");
+    const second = await waitFor(() => {
+      const active = vscode.window.activeTextEditor;
+      return active && active.document !== editor.document ? active : undefined;
+    }, "second text editor");
+    assert.match(second.document.uri.path, / \(2\)\.txt$/);
+    assert.ok(second.document.getText().includes(DOCUMENT_PAGES[2]));
+    assert.ok(editor.document.getText().startsWith("My notes"), "the edited extraction is kept");
+
+    // An unchanged extraction is shown again instead of opening a third copy.
+    await vscode.commands.executeCommand("vscode.openWith", uri, VIEW_TYPE);
+    await waitFor(() => vscode.window.tabGroups.activeTabGroup.activeTab?.input instanceof vscode.TabInputCustom, "PDF editor active");
+    await vscode.commands.executeCommand("pdfTools.openText");
+    const third = await waitFor(() => vscode.window.activeTextEditor, "text editor shown again");
+    assert.equal(third.document, second.document);
+    await vscode.commands.executeCommand("workbench.action.revertAndCloseActiveEditor");
+    await vscode.window.showTextDocument(editor.document);
     await vscode.commands.executeCommand("workbench.action.revertAndCloseActiveEditor");
   });
 

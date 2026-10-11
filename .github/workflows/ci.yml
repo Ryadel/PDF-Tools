@@ -1,0 +1,49 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build and test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+
+      - name: Type check and lint
+        run: |
+          npm run check-types
+          npm run lint
+
+      - name: Unit tests
+        run: npm run test:unit
+
+      # The integration tests run VS Code, which needs a display.
+      - name: Integration tests
+        run: xvfb-run -a npm test
+
+      - name: Package
+        run: npm run package
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: pdf-tools-vsix
+          path: "*.vsix"
+          if-no-files-found: error

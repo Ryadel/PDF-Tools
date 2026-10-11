@@ -137,7 +137,8 @@ export type HostToWebview =
   | { type: "settings"; settings: ViewerSettings }
   | { type: "requestSave"; requestId: number }
   | { type: "request"; requestId: number; request: ViewerRequest }
-  | { type: "saved" }
+  /** Written to disk; `unsavedFieldIds` changed after the saved snapshot and stay marked as changed. */
+  | { type: "saved"; unsavedFieldIds: string[] }
   /** The document has (or no longer has) unsaved changes, in any of its editors. */
   | { type: "dirty"; dirty: boolean }
   | { type: "applyFieldChanges"; changes: FieldChange[] }

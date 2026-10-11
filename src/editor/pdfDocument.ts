@@ -31,13 +31,26 @@ export class PdfDocument implements vscode.CustomDocument {
 
   readonly #panels = new Set<EditorPanel>();
   #lastActivePanel: EditorPanel | undefined;
-  /** Unsaved field values by widget id, replayed to panels that load later. */
-  readonly #unsavedFieldValues = new Map<string, unknown>();
+  /**
+   * Unsaved field values by widget id, replayed to panels that load later,
+   * with the sequence number of the change that set them.
+   */
+  readonly #unsavedFieldValues = new Map<string, { value: unknown; sequence: number }>();
+  #fieldChangeSequence = 0;
   #bytes: Uint8Array;
   #dirty: boolean;
   #diskMtime: number | undefined;
   #saving = 0;
-  #modifiedWhileSaving = false;
+  /** Saves run one at a time, in the order VS Code requested them. */
+  #saveQueue: Promise<void> = Promise.resolve();
+  /**
+   * Changes made while saving, reported once the saves are done unless a later
+   * save covered them: the field change sequence before the latest such change,
+   * and the panels that reported "modified" but whose field changes (sent just
+   * after) have not arrived yet.
+   */
+  #modifiedWhileSavingAfter: number | undefined;
+  readonly #awaitingFieldChanges = new Set<EditorPanel>();
   #diskChangeTimer: NodeJS.Timeout | undefined;
   #handlingDiskChange = false;
   readonly #disposables: vscode.Disposable[] = [];
@@ -90,18 +103,22 @@ export class PdfDocument implements vscode.CustomDocument {
 
   handlePanelLoaded(panel: EditorPanel): void {
     if (this.#unsavedFieldValues.size > 0) {
-      const changes = [...this.#unsavedFieldValues].map(([id, value]) => ({ id, value }));
+      const changes = [...this.#unsavedFieldValues].map(([id, { value }]) => ({ id, value }));
       panel.post({ type: "applyFieldChanges", changes });
     }
     panel.post({ type: "dirty", dirty: this.#dirty });
   }
 
-  handleModified(): void {
+  handleModified(source: EditorPanel): void {
     if (this.#saving > 0) {
       // Report it once the save has completed, or VS Code would clear it.
-      this.#modifiedWhileSaving = true;
+      this.#awaitingFieldChanges.add(source);
       return;
     }
+    this.#markModified();
+  }
+
+  #markModified(): void {
     this.#setDirty(true);
     this.#onDidChangeContent.fire();
   }
@@ -117,8 +134,15 @@ export class PdfDocument implements vscode.CustomDocument {
   }
 
   handleFieldChanges(source: EditorPanel, changes: FieldChange[]): void {
+    const sequenceBefore = this.#fieldChangeSequence;
     for (const { id, value } of changes) {
-      this.#unsavedFieldValues.set(id, value);
+      this.#unsavedFieldValues.set(id, { value, sequence: ++this.#fieldChangeSequence });
+    }
+    // A panel reports "modified" only on its first change after a save, so a
+    // change made during a save may arrive without one: it is tracked here.
+    const awaited = this.#awaitingFieldChanges.delete(source);
+    if (awaited || this.#saving > 0) {
+      this.#modifiedWhileSavingAfter = sequenceBefore;
     }
     for (const panel of this.#panels) {
       if (panel !== source) {
@@ -150,27 +174,57 @@ export class PdfDocument implements vscode.CustomDocument {
 
   async #saveTo(target: vscode.Uri, cancellation: vscode.CancellationToken, isSave: boolean): Promise<void> {
     this.#saving++;
+    const run = this.#saveQueue.then(() => this.#write(target, cancellation, isSave));
+    this.#saveQueue = run.catch(() => undefined);
     try {
-      const data = await this.getCurrentBytes();
-      if (cancellation.isCancellationRequested) {
-        throw new vscode.CancellationError();
-      }
-      await vscode.workspace.fs.writeFile(target, data);
-      if (isSave) {
-        this.#bytes = data;
-        this.#setDirty(false);
-        this.#unsavedFieldValues.clear();
-        await this.#recordDiskState();
-        for (const panel of this.#panels) {
-          panel.post({ type: "saved" });
-        }
-      }
+      await run;
     } finally {
       this.#saving--;
-      if (this.#saving === 0 && this.#modifiedWhileSaving) {
-        this.#modifiedWhileSaving = false;
+      if (this.#saving === 0 && (this.#modifiedWhileSavingAfter !== undefined || this.#awaitingFieldChanges.size > 0)) {
+        this.#modifiedWhileSavingAfter = undefined;
+        this.#awaitingFieldChanges.clear();
         // After VS Code has processed the save result, so the edit is not lost.
-        setTimeout(() => this.handleModified(), 0);
+        setTimeout(() => {
+          if (this.#saving > 0) {
+            this.#modifiedWhileSavingAfter ??= -1; // Covered by the new save, which reads every change so far.
+          } else {
+            this.#markModified();
+          }
+        }, 0);
+      }
+    }
+  }
+
+  async #write(target: vscode.Uri, cancellation: vscode.CancellationToken, isSave: boolean): Promise<void> {
+    if (cancellation.isCancellationRequested) {
+      throw new vscode.CancellationError();
+    }
+    // Every change up to here reached the saving panel before its save request
+    // (messages to a webview arrive in order), so the bytes include it. Later
+    // changes may or may not be included: they stay unsaved, and replaying a
+    // value the bytes already hold changes nothing.
+    const savedSequence = this.#fieldChangeSequence;
+    const data = await this.getCurrentBytes();
+    if (cancellation.isCancellationRequested) {
+      throw new vscode.CancellationError();
+    }
+    await vscode.workspace.fs.writeFile(target, data);
+    if (isSave) {
+      this.#bytes = data;
+      this.#setDirty(false);
+      // Changes made during an earlier queued save that this one included.
+      if (this.#awaitingFieldChanges.size === 0 && this.#modifiedWhileSavingAfter !== undefined && this.#modifiedWhileSavingAfter < savedSequence) {
+        this.#modifiedWhileSavingAfter = undefined;
+      }
+      for (const [id, { sequence }] of this.#unsavedFieldValues) {
+        if (sequence <= savedSequence) {
+          this.#unsavedFieldValues.delete(id);
+        }
+      }
+      await this.#recordDiskState();
+      const unsavedFieldIds = [...this.#unsavedFieldValues.keys()];
+      for (const panel of this.#panels) {
+        panel.post({ type: "saved", unsavedFieldIds });
       }
     }
   }

@@ -6,7 +6,7 @@
 
 View, fill, save, print and export PDFs in VS Code.
 
-PDF Tools brings a full-featured PDF editor to Visual Studio Code: view, navigate, search, rotate, split, merge, print and save PDF files without leaving the editor.
+PDF Tools brings a full-featured PDF editor to Visual Studio Code: view, navigate, search, fill, print and save PDF files, and export their text, pages and form data, without leaving the editor.
 
 One of its key features, missing from most PDF extensions for VS Code, is **real form filling**: fill in a PDF form and **save the values into the file** with <kbd>Ctrl</kbd>+<kbd>S</kbd>, exactly like a text file. Unsaved changes show the dot on the tab, auto save works, and Revert, Save As and hot exit (restoring unsaved changes after a restart) are supported.
 

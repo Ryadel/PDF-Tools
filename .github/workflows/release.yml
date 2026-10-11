@@ -1,0 +1,163 @@
+name: Release
+
+# Push a tag vX.Y.Z to release: the workflow checks the version, builds and tests, publishes the VSIX to the
+# Visual Studio Marketplace (Microsoft Entra ID, no stored token) and Open VSX, then creates the GitHub
+# release. Run it manually for a dry run (build and test only, no publishing).
+
+on:
+  push:
+    tags: ['v*.*.*']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build and test
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Check version
+        id: version
+        run: |
+          version=$(node -p "require('./package.json').version")
+          echo "package.json: $version"
+          if [ "$GITHUB_REF_TYPE" = "tag" ] && [ "$GITHUB_REF_NAME" != "v$version" ]; then
+            echo "::error::Tag $GITHUB_REF_NAME does not match package.json version v$version"; exit 1
+          fi
+          if ! grep -q "^## \[$version\]" CHANGELOG.md; then
+            echo "::error::CHANGELOG.md has no section for $version"; exit 1
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - run: npm ci
+
+      - name: Type check and lint
+        run: |
+          npm run check-types
+          npm run lint
+
+      - name: Unit tests
+        run: npm run test:unit
+
+      - name: Integration tests
+        run: xvfb-run -a npm test
+
+      - name: Package
+        run: npm run package
+
+      - name: Release notes from CHANGELOG
+        run: |
+          awk -v header="## [${{ steps.version.outputs.version }}]" '
+            index($0, header) == 1 { found = 1; next }
+            found && /^## \[/ { exit }
+            found { print }
+          ' CHANGELOG.md | sed '/./,$!d' > release-notes.md
+          cat release-notes.md
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: release
+          path: |
+            pdf-tools-${{ steps.version.outputs.version }}.vsix
+            release-notes.md
+          if-no-files-found: error
+
+  marketplace:
+    name: Publish to the Visual Studio Marketplace
+    needs: build
+    if: github.ref_type == 'tag'
+    runs-on: ubuntu-latest
+    # The managed identity's federated credential trusts this environment only.
+    environment: marketplace
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+
+      # Only vsce is needed: no lifecycle scripts in a job that can publish.
+      - run: npm ci --ignore-scripts
+
+      - uses: actions/download-artifact@v8
+        with:
+          name: release
+          path: release
+
+      - uses: azure/login@v3
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          allow-no-subscriptions: true
+
+      - name: Publish
+        run: npx vsce publish --azure-credential --skip-duplicate --packagePath "release/pdf-tools-${{ needs.build.outputs.version }}.vsix"
+
+  open-vsx:
+    name: Publish to Open VSX
+    needs: build
+    if: github.ref_type == 'tag'
+    runs-on: ubuntu-latest
+    environment: marketplace
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+
+      - uses: actions/download-artifact@v8
+        with:
+          name: release
+          path: release
+
+      # With the OVSX_PAT secret set, ovsx publishes with it. Without it, ovsx uses trusted publishing (the
+      # job's OIDC token), once this workflow is registered as a trusted publisher of the Ryadel namespace.
+      - name: Publish
+        env:
+          OVSX_PAT: ${{ secrets.OVSX_PAT }}
+        run: npx --yes ovsx@1.2.0 publish "release/pdf-tools-${{ needs.build.outputs.version }}.vsix" --skip-duplicate
+
+  github-release:
+    name: Create the GitHub release
+    needs: [build, marketplace, open-vsx]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          name: release
+          path: release
+
+      - name: Create or update the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          VERSION: ${{ needs.build.outputs.version }}
+        run: |
+          vsix="release/pdf-tools-$VERSION.vsix"
+          if gh release view "$GITHUB_REF_NAME" > /dev/null 2>&1; then
+            gh release upload "$GITHUB_REF_NAME" "$vsix" --clobber
+          else
+            gh release create "$GITHUB_REF_NAME" "$vsix" --verify-tag --title "PDF Tools $VERSION" --notes-file release/release-notes.md
+          fi

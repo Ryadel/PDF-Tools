@@ -1,8 +1,8 @@
 import * as vscode from "vscode";
 import { registerCommands } from "./commands";
 import { PdfEditorProvider } from "./editor/pdfEditorProvider";
-import { deleteOldTempCopies } from "./print/printService";
 import { PdfStatusBar } from "./statusBar";
+import { deleteOldTempFiles } from "./tempFiles";
 import { registerTestCommands } from "./testing/testCommands";
 
 export function activate(context: vscode.ExtensionContext): void {
@@ -26,7 +26,7 @@ export function activate(context: vscode.ExtensionContext): void {
     context.subscriptions.push(registerTestCommands(provider));
   }
 
-  void deleteOldTempCopies();
+  void deleteOldTempFiles();
 }
 
 export function deactivate(): void {}

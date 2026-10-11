@@ -1,9 +1,9 @@
 import { mkdir, writeFile } from "node:fs/promises";
-import { tmpdir } from "node:os";
 import { basename, join } from "node:path";
 import * as vscode from "vscode";
 import { errorMessage, log } from "../log";
 import { initialView, viewerSettings } from "../settings";
+import { ATTACHMENT_TEMP_FOLDER, deleteOldTempFiles } from "../tempFiles";
 import { takeTestPassword } from "../testing/testCommands";
 import type {
   FormKind,
@@ -179,7 +179,7 @@ export class EditorPanel implements vscode.Disposable {
         log().error(`Failed to load ${this.document.uri.toString(true)}: ${message.message}`);
         break;
       case "modified":
-        this.document.handleModified();
+        this.document.handleModified(this);
         break;
       case "fieldChanges":
         this.document.handleFieldChanges(this, message.changes);
@@ -261,10 +261,11 @@ export class EditorPanel implements vscode.Disposable {
     }
   }
 
-  /** Opens an attachment in VS Code (PDFs open in PDF Tools) from a temporary copy. */
+  /** Opens an attachment in VS Code (PDFs open in PDF Tools) from a temporary copy, deleted after a day. */
   async #openAttachment(filename: string, data: Uint8Array): Promise<void> {
+    void deleteOldTempFiles();
     try {
-      const folder = join(tmpdir(), "vscode-pdf-tools-attachments", String(Date.now()));
+      const folder = join(ATTACHMENT_TEMP_FOLDER, String(Date.now()));
       await mkdir(folder, { recursive: true });
       const file = join(folder, safeFileName(filename));
       await writeFile(file, data);

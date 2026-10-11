@@ -202,7 +202,7 @@ export class App implements AppContext {
         }
         break;
       case "saved":
-        this.engine.markSaved();
+        this.engine.markSaved(message.unsavedFieldIds);
         this.onFieldsChanged();
         break;
       case "applyFieldChanges":

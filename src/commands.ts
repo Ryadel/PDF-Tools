@@ -210,13 +210,28 @@ async function openText(panel: EditorPanel): Promise<void> {
       return;
     }
     // An untitled document named after the PDF: saving it proposes `<name>.txt` next to it.
-    const name = `${posix.parse(document.fileName).name}.txt`;
-    const untitled = vscode.Uri.joinPath(document.uri, "..", name).with({ scheme: "untitled" });
-    const textDocument = await vscode.workspace.openTextDocument(untitled);
-    const editor = await vscode.window.showTextDocument(textDocument, { preview: false });
-    const all = new vscode.Range(0, 0, textDocument.lineCount, 0);
-    await editor.edit((edit) => edit.replace(all, text));
-    editor.selection = new vscode.Selection(0, 0, 0, 0);
+    // If that document is already open with other content (edited, or an older
+    // extraction), a new one is opened as `<name> (2).txt` and so on.
+    const { name } = posix.parse(document.fileName);
+    for (let copy = 1; ; copy++) {
+      const fileName = copy === 1 ? `${name}.txt` : `${name} (${copy}).txt`;
+      const untitled = vscode.Uri.joinPath(document.uri, "..", fileName).with({ scheme: "untitled" });
+      const open = vscode.workspace.textDocuments.find(
+        (candidate) => !candidate.isClosed && candidate.uri.toString() === untitled.toString(),
+      );
+      if (!open) {
+        const textDocument = await vscode.workspace.openTextDocument(untitled);
+        const editor = await vscode.window.showTextDocument(textDocument, { preview: false });
+        await editor.edit((edit) => edit.replace(new vscode.Range(0, 0, textDocument.lineCount, 0), text));
+        editor.selection = new vscode.Selection(0, 0, 0, 0);
+        return;
+      }
+      // The editor may have turned the extracted "\n" into "\r\n" (files.eol).
+      if (open.getText().replace(/\r\n/g, "\n") === text) {
+        await vscode.window.showTextDocument(open, { preview: false });
+        return;
+      }
+    }
   } catch (error) {
     log().error(`Text extraction failed for ${document.uri.toString(true)}: ${errorMessage(error)}`);
     void vscode.window.showErrorMessage(vscode.l10n.t("Could not extract the text of '{0}': {1}", document.fileName, errorMessage(error)));

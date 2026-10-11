@@ -1,11 +1,11 @@
 import { execFile } from "node:child_process";
-import { mkdir, readdir, rm, stat, writeFile } from "node:fs/promises";
-import { tmpdir } from "node:os";
+import { mkdir, writeFile } from "node:fs/promises";
 import { join, parse } from "node:path";
 import * as vscode from "vscode";
 import type { EditorPanel } from "../editor/editorPanel";
 import { errorMessage, log } from "../log";
 import { formatPageRanges } from "../shared/pageRanges";
+import { deleteOldTempFiles, PRINT_TEMP_FOLDER } from "../tempFiles";
 
 /**
  * Printing for PDF Tools.
@@ -18,9 +18,6 @@ import { formatPageRanges } from "../shared/pageRanges";
 
 type PrintMethod = "systemViewer" | "windowsPrintVerb";
 
-const TEMP_FOLDER = join(tmpdir(), "vscode-pdf-tools-print");
-/** Temporary copies older than this are deleted on the next print/activation. */
-const TEMP_MAX_AGE_MS = 24 * 60 * 60 * 1000;
 const PRINT_VERB_TIMEOUT_MS = 30_000;
 
 /** Prints the document, or only `pages` (1-based, sorted) of it. Form values are included. */
@@ -59,10 +56,10 @@ export async function printPanel(panel: EditorPanel, pages?: number[]): Promise<
 }
 
 async function writeTempCopy(fileName: string, data: Uint8Array, suffix: string): Promise<string> {
-  await mkdir(TEMP_FOLDER, { recursive: true });
-  void deleteOldTempCopies();
+  await mkdir(PRINT_TEMP_FOLDER, { recursive: true });
+  void deleteOldTempFiles();
   const { name } = parse(fileName);
-  const file = join(TEMP_FOLDER, `${name}${suffix}-print-${Date.now()}.pdf`);
+  const file = join(PRINT_TEMP_FOLDER, `${name}${suffix}-print-${Date.now()}.pdf`);
   await writeFile(file, data);
   return file;
 }
@@ -78,19 +75,4 @@ function printWithShellVerb(file: string): Promise<void> {
       (error, _stdout, stderr) => (error ? reject(new Error(stderr.trim() || error.message)) : resolve()),
     );
   });
-}
-
-/** Best-effort cleanup of print copies left by earlier sessions. */
-export async function deleteOldTempCopies(): Promise<void> {
-  try {
-    const now = Date.now();
-    for (const entry of await readdir(TEMP_FOLDER)) {
-      const path = join(TEMP_FOLDER, entry);
-      if (now - (await stat(path)).mtimeMs > TEMP_MAX_AGE_MS) {
-        await rm(path, { force: true });
-      }
-    }
-  } catch {
-    // Folder missing or file in use: try again next time.
-  }
 }

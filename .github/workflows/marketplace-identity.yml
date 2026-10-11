@@ -1,0 +1,32 @@
+name: Marketplace identity
+
+# One-time setup helper: signs in as the managed identity of the `marketplace` environment and prints its
+# Azure DevOps profile id, the value to add as a Contributor in the publisher's Members on
+# https://marketplace.visualstudio.com/manage. Then checks that the identity can publish as Ryadel.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  identity:
+    name: Show the identity's profile id
+    runs-on: ubuntu-latest
+    environment: marketplace
+    steps:
+      - uses: azure/login@v3
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          allow-no-subscriptions: true
+
+      # 499b84ac-… is the well-known application id of Azure DevOps (which serves the Marketplace).
+      - name: Profile id
+        run: az rest -u https://app.vssps.visualstudio.com/_apis/profile/profiles/me --resource 499b84ac-1321-427f-aa17-267ca6975798 --query id -o tsv
+
+      # Fails until the profile id above is a member of the publisher.
+      - name: Can publish as Ryadel
+        run: npx --yes @vscode/vsce@4.0.0 verify-pat Ryadel --azure-credential
