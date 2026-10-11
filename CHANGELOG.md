@@ -4,6 +4,8 @@ All notable changes to PDF Tools are documented in this file. The format follows
 
 ## [Unreleased]
 
+## [1.0.1] - 2026-10-12
+
 ### Fixed
 
 - Form values changed while a save was in progress were left out of editors opened afterwards, and the document could end up marked as saved without them. Overlapping saves now run one after the other.
